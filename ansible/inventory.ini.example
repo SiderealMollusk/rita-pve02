@@ -1,0 +1,10 @@
+[cp]
+k8s-cp-01 ansible_host=192.168.1.100
+
+[workers]
+k8s-wk-01 ansible_host=192.168.1.101
+k8s-wk-02 ansible_host=192.168.1.102
+
+[k8s:children]
+cp
+workers

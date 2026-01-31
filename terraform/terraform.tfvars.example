@@ -1,0 +1,6 @@
+proxmox_endpoint = "https://192.168.1.10:8006/"
+proxmox_api_token = "root@pam!tokenid=tokensecret"
+ssh_public_key    = "ssh-rsa AAAAB3..."
+node_name         = "pve"
+storage_pool      = "local-lvm"
+network_bridge    = "vmbr0"

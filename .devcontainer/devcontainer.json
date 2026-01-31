@@ -1,0 +1,19 @@
+{
+    "name": "Proxmox Lab Manager",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:1": {}
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "hashicorp.terraform",
+                "redhat.ansible",
+                "ms-kubernetes-tools.vscode-kubernetes-tools"
+            ]
+        }
+    },
+    "remoteUser": "vscode"
+}

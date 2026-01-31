@@ -1,0 +1,9 @@
+---
+- name: Apply baseline configuration
+  hosts: k8s
+  become: yes
+  vars:
+    tailscale_auth_key: "{{ lookup('env', 'TAILSCALE_AUTH_KEY') }}"
+  roles:
+    - baseline
+    - tailscale

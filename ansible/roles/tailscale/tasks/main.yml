@@ -1,0 +1,11 @@
+---
+- name: Install Tailscale
+  shell: curl -fsSL https://tailscale.com/install.sh | sh
+  args:
+    creates: /usr/bin/tailscale
+
+- name: Authenticate Tailscale
+  shell: "tailscale up --authkey={{ tailscale_auth_key }}"
+  when: tailscale_auth_key is defined and tailscale_auth_key != ""
+  register: tailscale_up
+  changed_when: "'already' not in tailscale_up.stdout"

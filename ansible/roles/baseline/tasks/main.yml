@@ -1,0 +1,33 @@
+---
+- name: Update apt cache and upgrade packages
+  apt:
+    update_cache: yes
+    upgrade: dist
+    autoremove: yes
+
+- name: Install common packages
+  apt:
+    name:
+      - curl
+      - wget
+      - vim
+      - git
+      - htop
+      - unzip
+      - build-essential
+      - software-properties-common
+    state: present
+
+- name: Disable password authentication for SSH
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+  notify: Restart SSH
+
+- name: Disable root login
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PermitRootLogin'
+    line: 'PermitRootLogin no'
+  notify: Restart SSH

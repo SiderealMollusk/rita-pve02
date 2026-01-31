@@ -1,0 +1,12 @@
+---
+- name: Setup K3s Control Plane
+  hosts: cp
+  become: yes
+  roles:
+    - k3s-server
+
+- name: Setup K3s Workers
+  hosts: workers
+  become: yes
+  roles:
+    - k3s-agent
