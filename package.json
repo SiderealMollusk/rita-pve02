@@ -1,0 +1,44 @@
+{
+  "name": "rita-pve02",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "This repository contains the Infrastructure as Code (IaC) and configuration management for a Proxmox-based Kubernetes home lab.",
+  "main": "dist/index.js",
+  "bin": {
+    "lab": "dist/bin/run.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/bin/run.ts",
+    "preflight": "tsx src/bin/run.ts preflight",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "day0:secrets": "tsx src/bin/run.ts init",
+    "day1:terraform": "echo 'Run: cd terraform && terraform apply'",
+    "day2:ansible": "echo 'Run: ansible-playbook -i ansible/inventory.ini ansible/playbooks/baseline.yml'",
+    "day3:k8s": "echo 'Run: ansible-playbook -i ansible/inventory.ini ansible/playbooks/k3s-setup.yml'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "oclif": {
+    "bin": "lab",
+    "dirname": "lab",
+    "commands": "./dist/commands",
+    "topicSeparator": " "
+  },
+  "devDependencies": {
+    "@oclif/core": "^4.8.0",
+    "@types/node": "^25.2.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "dotenv": "^17.2.3",
+    "execa": "^9.6.1",
+    "listr2": "^9.0.5",
+    "oclif": "^4.22.73"
+  }
+}

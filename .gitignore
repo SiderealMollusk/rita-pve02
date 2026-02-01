@@ -11,6 +11,12 @@ inventory.ini
 
 # Environment
 .env
+secrets.env
 
 # Dev Container
 .devcontainer/.env
+# Node.js / CLI
+node_modules/
+dist/
+.npmrc
+*.log
