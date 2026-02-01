@@ -67,11 +67,21 @@ const proxmoxAPITokenStrategy = createExternalStrategy(
 );
 
 /**
- * Tailscale Auth Key strategy (external - to be implemented)
+ * Tailscale Auth Key strategy (external - for production VMs)
  */
 const tailscaleAuthKeyStrategy = createExternalStrategy(
   "Tailscale Auth Key",
-  "Generate at: https://login.tailscale.com/admin/settings/keys\nOr use Tailscale API (to be implemented later)"
+  "Generate at: https://login.tailscale.com/admin/settings/keys\nSettings: Reusable, tag:vm, 90-day expiry\nFor production VMs joining tailnet"
+);
+
+/**
+ * Tailscale API Token strategy (no-op - pve02-dev-container-sessions)
+ * This is a manual-only secret. The user must generate it via the Tailscale admin console.
+ * No automation possible - Tailscale API requires an existing token to create tokens.
+ */
+const tailscaleAPITokenStrategy = createExternalStrategy(
+  "Tailscale API Token",
+  "🔗 Generate here: https://login.tailscale.com/admin/settings/keys\n\nSettings:\n  • Type: Personal API token\n  • Expiry: 90 days\n  • Scope: API access (for pve02-dev-container-sessions)\n\nThis token lets the dev container generate ephemeral session keys.\nNo automation possible - requires existing token to create tokens."
 );
 
 /**
@@ -255,5 +265,6 @@ export const rotationStrategies: Record<string, RotationStrategy> = {
   "ssh-public-key": sshPublicKeyStrategy,
   "ssh-private-key": sshPrivateKeyStrategy,
   "tailscale-auth-key": tailscaleAuthKeyStrategy,
+  "tailscale-api-token": tailscaleAPITokenStrategy,
   password: passwordStrategy,
 };

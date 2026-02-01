@@ -56,7 +56,8 @@ export function parseSecretsTemplate(filePath: string): SecretEntry[] {
 function inferSecretType(envVar: string, opRef: string): string {
   const field = opRef.split("/").pop() || "";
 
-  if (field.includes("api-token")) return "proxmox-api-token";
+  if (field.includes("api-token") && envVar.includes("PROXMOX")) return "proxmox-api-token";
+  if (field.includes("api-token") && envVar.includes("TAILSCALE")) return "tailscale-api-token";
   if (field.includes("public-key")) return "ssh-public-key";
   if (field.includes("private-key")) return "ssh-private-key";
   if (field.includes("auth-key")) return "tailscale-auth-key";

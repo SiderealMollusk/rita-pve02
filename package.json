@@ -14,6 +14,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "day0:secrets": "tsx src/bin/run.ts init",
+    "day0:tailscale": "tsx src/bin/run.ts tailscale-up",
     "day1:terraform": "echo 'Run: cd terraform && terraform apply'",
     "day2:ansible": "echo 'Run: ansible-playbook -i ansible/inventory.ini ansible/playbooks/baseline.yml'",
     "day3:k8s": "echo 'Run: ansible-playbook -i ansible/inventory.ini ansible/playbooks/k3s-setup.yml'"
