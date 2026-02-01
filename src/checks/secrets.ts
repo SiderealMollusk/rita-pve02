@@ -4,7 +4,8 @@
  */
 
 import { Check, CheckResult, RunContext } from "../lib/types";
-import { parseSecretsTemplate } from "../lib/secret-rotation";
+import { parseSecretsTemplate } from "../lib/secrets-template-parser";
+import { getStrategy } from "../lib/secret-name-mapping";
 import { execOutput } from "../lib/exec";
 
 /**
@@ -16,9 +17,9 @@ export const secretsExistCheck: Check = {
   tags: ["preflight", "secrets"],
   async run(ctx: RunContext): Promise<CheckResult> {
     try {
-      const entries = parseSecretsTemplate(ctx.config.secretsTemplate);
+      const secretLines = parseSecretsTemplate(ctx.config.secretsTemplate);
 
-      if (entries.length === 0) {
+      if (secretLines.length === 0) {
         return {
           status: "warn",
           message: "No secrets defined in template",
@@ -29,19 +30,19 @@ export const secretsExistCheck: Check = {
       const empty: string[] = [];
       const valid: string[] = [];
 
-      for (const entry of entries) {
+      for (const line of secretLines) {
         try {
-          const value = await execOutput("op", ["read", entry.opRef], {
+          const value = await execOutput("op", ["read", line.opPath], {
             throwOnError: true,
           });
 
           if (!value || value.trim() === "") {
-            empty.push(`${entry.envVar} (${entry.type})`);
+            empty.push(line.name);
           } else {
-            valid.push(entry.envVar);
+            valid.push(line.name);
           }
         } catch {
-          missing.push(`${entry.envVar} (${entry.type})`);
+          missing.push(line.name);
         }
       }
 
@@ -91,13 +92,19 @@ export const secretsValidateCheck: Check = {
   tags: ["preflight", "secrets"],
   async run(ctx: RunContext): Promise<CheckResult> {
     try {
-      const entries = parseSecretsTemplate(ctx.config.secretsTemplate);
+      const secretLines = parseSecretsTemplate(ctx.config.secretsTemplate);
       const invalid: string[] = [];
       const valid: string[] = [];
 
-      for (const entry of entries) {
+      for (const line of secretLines) {
+        const strategy = getStrategy(line.name);
+        
+        if (!strategy) {
+          continue; // Unknown secrets skip validation
+        }
+
         try {
-          const value = await execOutput("op", ["read", entry.opRef], {
+          const value = await execOutput("op", ["read", line.opPath], {
             throwOnError: true,
           });
 
@@ -105,9 +112,9 @@ export const secretsValidateCheck: Check = {
             continue; // secretsExistCheck handles this
           }
 
-          // Validate format based on type
+          // Validate format based on strategy type
           let isValid = true;
-          switch (entry.type) {
+          switch (strategy) {
             case "ssh-public-key":
               isValid = value.startsWith("ssh-") || value.includes("BEGIN PUBLIC KEY");
               break;
@@ -120,17 +127,17 @@ export const secretsValidateCheck: Check = {
             case "tailscale-auth-key":
               isValid = value.startsWith("tskey-");
               break;
-            case "password":
-              isValid = value.length >= 8;
+            case "tailscale-api-token":
+              isValid = value.startsWith("tskey-api-");
               break;
             default:
               isValid = true; // Unknown types pass
           }
 
           if (isValid) {
-            valid.push(entry.envVar);
+            valid.push(line.name);
           } else {
-            invalid.push(`${entry.envVar} (${entry.type})`);
+            invalid.push(`${line.name} (${strategy})`);
           }
         } catch {
           continue; // secretsExistCheck handles missing secrets

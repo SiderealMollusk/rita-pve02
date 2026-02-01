@@ -6,6 +6,7 @@ import { Command, Flags } from "@oclif/core";
 import chalk from "chalk";
 import { execOutput, execJSON } from "../lib/exec";
 import { loadConfig } from "../lib/config";
+import { checkOpAvailable, checkOpPathExists } from "../lib/rotation-orchestrator";
 
 interface TailscaleStatus {
   BackendState?: string;
@@ -69,43 +70,57 @@ export default class TailscaleUp extends Command {
         // Not authenticated, continue
       }
 
-      // Check 3: Get auth key from vault
-      console.log(chalk.gray("3️⃣  Reading TAILSCALE_AUTH_KEY from vault..."));
-      const config = loadConfig();
-
-      let authKey: string | undefined;
-      try {
-        authKey = await execOutput("op", [
-          "read",
-          "op://pve02/tailscale/auth-key",
-        ]);
-        authKey = authKey.trim();
-
-        if (!authKey) {
-          throw new Error("Auth key is empty");
-        }
-
-        console.log(chalk.green("   ✓ Auth key retrieved"));
-
-        if (flags.verbose) {
-          console.log(
-            chalk.gray(`   Key preview: ${authKey.slice(0, 10)}...`)
-          );
-        }
-      } catch (error) {
+      // Check 3: 1Password CLI available
+      console.log(chalk.gray("3️⃣  Checking 1Password CLI..."));
+      const opAvailable = await checkOpAvailable();
+      if (!opAvailable) {
         console.log(
-          chalk.red("   ✗ Failed to read TAILSCALE_AUTH_KEY from vault")
+          chalk.red("   ✗ op CLI not available")
         );
         console.log(
+          chalk.yellow("   Install: https://developer.1password.com/docs/cli/get-started")
+        );
+        process.exit(1);
+      }
+      console.log(chalk.green("   ✓ op CLI available"));
+
+      // Check 4: Auth key exists in vault
+      console.log(chalk.gray("4️⃣  Checking TAILSCALE_AUTH_KEY..."));
+      const authKeyCheck = await checkOpPathExists(
+        "op://pve02/tailscale/auth-key"
+      );
+
+      let authKey: string | undefined;
+
+      if (!authKeyCheck.exists) {
+        console.log(chalk.red("   ✗ Auth key not in vault"));
+        console.log(
           chalk.yellow(
-            "   Run: npm run day0:secrets to initialize secrets first"
+            "   Run: npm run rotate:tailscale-auth-key to generate"
           )
         );
         process.exit(1);
       }
 
-      // Check 4: Connect to Tailscale
-      console.log(chalk.gray("4️⃣  Connecting to Tailscale network..."));
+      if (!authKeyCheck.value || authKeyCheck.value.trim() === "") {
+        console.log(chalk.red("   ✗ Auth key is empty"));
+        console.log(
+          chalk.yellow(
+            "   Run: npm run rotate:tailscale-auth-key to generate"
+          )
+        );
+        process.exit(1);
+      }
+
+      authKey = authKeyCheck.value.trim();
+      console.log(chalk.green("   ✓ Auth key found in vault"));
+
+      if (!authKey) {
+        process.exit(1);
+      }
+
+      // Check 5: Connect to Tailscale
+      console.log(chalk.gray("5️⃣  Connecting to Tailscale network..."));
 
       if (flags["dry-run"]) {
         console.log(
@@ -135,7 +150,7 @@ export default class TailscaleUp extends Command {
       }
 
       // Verify connected
-      console.log(chalk.gray("5️⃣  Verifying connection..."));
+      console.log(chalk.gray("6️⃣  Verifying connection..."));
       try {
         const status = await execJSON<TailscaleStatus>("tailscale", [
           "status",

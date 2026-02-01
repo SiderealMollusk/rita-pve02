@@ -5,7 +5,6 @@
 import { Command, Flags } from "@oclif/core";
 import chalk from "chalk";
 import { loadConfig, isSecretsEnvStale } from "../lib/config";
-import { initializeSecrets } from "../lib/secrets";
 import { runChain } from "../lib/chains";
 import { formatChainReports, createChainReport } from "../lib/summary";
 import { Check, RunContext } from "../lib/types";
