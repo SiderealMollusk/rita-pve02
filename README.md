@@ -28,6 +28,45 @@ This repository contains the Infrastructure as Code (IaC) and configuration mana
 
 ## Usage
 
+### Secret Management & Vaults
+
+This project uses 1Password for centralized secret management with support for multiple vaults (production and testing).
+
+**Vault Configuration:** [vaults.config.json](vaults.config.json)
+```json
+{
+  "vaults": {
+    "pve02": { "id": "pve02", "name": "PVE02 Production", ... },
+    "pve2-test": { "id": "pve2-test", "name": "PVE2 Testing", ... }
+  },
+  "active": "pve02"
+}
+```
+
+**Switching Vaults:**
+```bash
+# Use production vault (default)
+npm run rotate:ssh-keys
+
+# Switch to testing vault with environment variable
+OP_VAULT=pve2-test npm run rotate:ssh-keys
+
+# Or update vaults.config.json to change default active vault
+```
+
+**Secret Rotation Commands:**
+```bash
+npm run rotate:ssh-keys          # Generate ED25519 keypair
+npm run rotate:proxmox-token     # Prompt for Proxmox API token
+npm run rotate:tailscale-auth-key    # Prompt for Tailscale auth key
+npm run rotate:tailscale-api-token   # Prompt for Tailscale API token
+```
+
+All commands will:
+- Check 1Password CLI availability and signin status
+- Display secret purpose from configuration
+- Automatically store in the active vault
+
 ### 1. Secret Configuration
 
 Copy `.env.example` to `.env` and fill in the 1Password URIs or values.
