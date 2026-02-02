@@ -11,5 +11,5 @@
       "description": "Testing vault for development and validation"
     }
   },
-  "active": "pve02"
+  "active": "pve02-test"
 }

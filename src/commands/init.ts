@@ -7,6 +7,7 @@ import chalk from "chalk";
 import { parseSecretsTemplate as parseTemplate } from "../lib/secrets-template-parser.js";
 import { getStrategy } from "../lib/secret-name-mapping.js";
 import { orchestrateRotation, getRotationInstructions } from "../lib/rotation-orchestrator.js";
+import { getActiveVault } from "../lib/vaults-config.js";
 import { resolve } from "path";
 
 export default class Init extends Command {
@@ -24,35 +25,37 @@ export default class Init extends Command {
     const { flags } = await this.parse(Init);
 
     try {
-      const templatePath = resolve(process.cwd(), "secrets.template");
-      const secretLines = parseTemplate(templatePath);
+      const { loadSecretsConfig } = await import("../lib/secrets-config.js");
+      const config = loadSecretsConfig();
+      const activeVault = getActiveVault();
 
       console.log(
-        chalk.blue(`\n📝 Found ${secretLines.length} secret(s) to initialize\n`)
+        chalk.blue(`\n📝 Found ${config.secrets.length} secret(s) to initialize`)
       );
+      console.log(chalk.gray(`   Using vault: ${activeVault}\n`));
 
       let succeeded = 0;
       let failed = 0;
 
-      for (const line of secretLines) {
-        const strategy = getStrategy(line.name);
+      for (const secret of config.secrets) {
+        const strategy = getStrategy(secret.name);
         
         if (!strategy) {
           console.log(
-            chalk.red(`  ✗ ${line.name}: No strategy found`)
+            chalk.red(`  ✗ ${secret.name}: No strategy found`)
           );
           failed++;
           continue;
         }
 
-        console.log(chalk.cyan(`\n📝 Initializing ${line.name}`));
+        console.log(chalk.cyan(`\n📝 Initializing ${secret.name}`));
         console.log(chalk.gray(`   Strategy: ${strategy}`));
-        console.log(chalk.gray(`   Path: ${line.opPath}`));
+        console.log(chalk.gray(`   Path: ${secret.opPath}`));
 
         // Orchestrate the rotation/initialization
         const state = await orchestrateRotation({
-          secretName: line.name,
-          opPath: line.opPath,
+          secretName: secret.name,
+          opPath: secret.opPath,
           strategy,
         });
 
