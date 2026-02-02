@@ -1,19 +1,27 @@
 /**
- * Rotate Tailscale API Token
+ * Rotate Tailscale Auth Key
  * External no-op: user must generate from Tailscale UI
  */
 
 import { orchestrateRotation, getRotationInstructions, requireOpSignedIn } from "../lib/rotation-orchestrator";
 import { getStrategy } from "../lib/secret-name-mapping";
 import { getSecretConfig } from "../lib/secrets-config";
+import { getActiveVault } from "../lib/vaults-config";
 import { createInterface } from "readline";
 
-async function rotateTailscaleApiToken() {
+async function rotateTailscaleAuthKey() {
   // Fail early if op not signed in
   await requireOpSignedIn();
 
-  const secretName = "TAILSCALE_API_TOKEN";
-  const opPath = "op://pve02/tailscale/api-token";
+  const secretName = "TAILSCALE_AUTH_KEY";
+  const secretConfig = getSecretConfig(secretName);
+  
+  if (!secretConfig) {
+    console.error(`❌ Secret not found: ${secretName}`);
+    process.exit(1);
+  }
+
+  const opPath = secretConfig.opPath;
   const strategy = getStrategy(secretName);
 
   if (!strategy) {
@@ -21,10 +29,10 @@ async function rotateTailscaleApiToken() {
     process.exit(1);
   }
 
-  const config = getSecretConfig(secretName);
+  const activeVault = getActiveVault();
   console.log(`🔄 Rotating ${secretName}`);
-  if (config?.description) {
-    console.log(`   Purpose: ${config.description}`);
+  if (secretConfig.description) {
+    console.log(`   Purpose: ${secretConfig.description}`);
   }
   console.log();
 
@@ -50,26 +58,26 @@ async function rotateTailscaleApiToken() {
     output: process.stdout,
   });
 
-  rl.question("Paste API token here: ", async (token) => {
+  rl.question("Paste auth key here: ", async (key) => {
     rl.close();
 
-    if (!token.trim()) {
+    if (!key.trim()) {
       console.log("⏭️  Skipped");
       process.exit(0);
     }
 
     try {
       const { execa } = await import("execa");
-      await execa("op", ["item", "edit", "tailscale", `api-token=${token}`, "--vault", "pve02"]);
-      console.log(`✓ Tailscale API token updated`);
+      await execa("op", ["item", "edit", "tailscale", `AUTH_KEY=${key}`, "--vault", activeVault]);
+      console.log(`✓ Tailscale auth key updated`);
     } catch (error) {
-      console.error(`❌ Failed to update token:`, error);
+      console.error(`❌ Failed to update key:`, error);
       process.exit(1);
     }
   });
 }
 
-rotateTailscaleApiToken()
+rotateTailscaleAuthKey()
   .then(() => process.exit(0))
   .catch((error) => {
     console.error("❌ Fatal error:", error);

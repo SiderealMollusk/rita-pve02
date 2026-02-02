@@ -7,13 +7,21 @@ import { execa } from "execa";
 import { orchestrateRotation, getRotationInstructions, requireOpSignedIn } from "../lib/rotation-orchestrator";
 import { getStrategy } from "../lib/secret-name-mapping";
 import { getSecretConfig } from "../lib/secrets-config";
+import { getActiveVault } from "../lib/vaults-config";
 
 async function rotateSshKeys() {
   // Fail early if op not signed in
   await requireOpSignedIn();
 
   const secretName = "VM_INIT_SSH_PRIVATE_KEY";
-  const opPath = "op://pve02/vm-init-ssh/private-key";
+  const secretConfig = getSecretConfig(secretName);
+  
+  if (!secretConfig) {
+    console.error(`❌ Secret not found: ${secretName}`);
+    process.exit(1);
+  }
+
+  const opPath = secretConfig.opPath;
   const strategy = getStrategy(secretName);
 
   if (!strategy) {
@@ -21,12 +29,13 @@ async function rotateSshKeys() {
     process.exit(1);
   }
 
-  const config = getSecretConfig(secretName);
   console.log(`🔄 Rotating ${secretName}`);
-  if (config?.description) {
-    console.log(`   Purpose: ${config.description}`);
+  if (secretConfig.description) {
+    console.log(`   Purpose: ${secretConfig.description}`);
   }
   console.log();
+
+  const activeVault = getActiveVault();
 
   // Step 1: Orchestrate (check op, create dummy if needed)
   const state = await orchestrateRotation({
@@ -71,11 +80,11 @@ async function rotateSshKeys() {
 
     // Store in op
     console.log(`✓ Generated. Storing in vault...`);
-    await execa("op", ["item", "edit", "vm-init-ssh", `private-key=${privateKey}`, "--vault", "pve02"]);
+    await execa("op", ["item", "edit", "vm-init-ssh", `PRIVATE_KEY=${privateKey}`, "--vault", activeVault]);
 
     // Also update public key
     const publicKey = readFileSync(`${keyPath}.pub`, "utf-8");
-    await execa("op", ["item", "edit", "vm-init-ssh", `public-key=${publicKey}`, "--vault", "pve02"]);
+    await execa("op", ["item", "edit", "vm-init-ssh", `PUBLIC_KEY=${publicKey}`, "--vault", activeVault]);
 
     console.log(`✓ SSH keys rotated successfully\n`);
 

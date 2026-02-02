@@ -1,19 +1,27 @@
 /**
- * Rotate Tailscale Auth Key
- * External no-op: user must generate from Tailscale UI
+ * Rotate Proxmox API Token
+ * External no-op: user must generate from Proxmox UI
  */
 
 import { orchestrateRotation, getRotationInstructions, requireOpSignedIn } from "../lib/rotation-orchestrator";
 import { getStrategy } from "../lib/secret-name-mapping";
 import { getSecretConfig } from "../lib/secrets-config";
+import { getActiveVault } from "../lib/vaults-config";
 import { createInterface } from "readline";
 
-async function rotateTailscaleAuthKey() {
+async function rotateProxmoxToken() {
   // Fail early if op not signed in
   await requireOpSignedIn();
 
-  const secretName = "TAILSCALE_AUTH_KEY";
-  const opPath = "op://pve02/tailscale/auth-key";
+  const secretName = "TF_VAR_PROXMOX_API_TOKEN";
+  const secretConfig = getSecretConfig(secretName);
+  
+  if (!secretConfig) {
+    console.error(`❌ Secret not found: ${secretName}`);
+    process.exit(1);
+  }
+
+  const opPath = secretConfig.opPath;
   const strategy = getStrategy(secretName);
 
   if (!strategy) {
@@ -21,10 +29,10 @@ async function rotateTailscaleAuthKey() {
     process.exit(1);
   }
 
-  const config = getSecretConfig(secretName);
+  const activeVault = getActiveVault();
   console.log(`🔄 Rotating ${secretName}`);
-  if (config?.description) {
-    console.log(`   Purpose: ${config.description}`);
+  if (secretConfig.description) {
+    console.log(`   Purpose: ${secretConfig.description}`);
   }
   console.log();
 
@@ -50,26 +58,26 @@ async function rotateTailscaleAuthKey() {
     output: process.stdout,
   });
 
-  rl.question("Paste auth key here: ", async (key) => {
+  rl.question("Paste token here: ", async (token) => {
     rl.close();
 
-    if (!key.trim()) {
+    if (!token.trim()) {
       console.log("⏭️  Skipped");
       process.exit(0);
     }
 
     try {
       const { execa } = await import("execa");
-      await execa("op", ["item", "edit", "tailscale", `auth-key=${key}`, "--vault", "pve02"]);
-      console.log(`✓ Tailscale auth key updated`);
+      await execa("op", ["item", "edit", "proxmox", `API_TOKEN=${token}`, "--vault", activeVault]);
+      console.log(`✓ Proxmox API token updated`);
     } catch (error) {
-      console.error(`❌ Failed to update key:`, error);
+      console.error(`❌ Failed to update token:`, error);
       process.exit(1);
     }
   });
 }
 
-rotateTailscaleAuthKey()
+rotateProxmoxToken()
   .then(() => process.exit(0))
   .catch((error) => {
     console.error("❌ Fatal error:", error);

@@ -7,6 +7,7 @@ import { exec, execOutput, commandExists } from "../lib/exec";
 import { readFileSync, writeFileSync, mkdtempSync, rmSync, chmodSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
+import { getActiveVault } from "../lib/vaults-config";
 
 interface SecretsConfig {
   secrets: Array<{

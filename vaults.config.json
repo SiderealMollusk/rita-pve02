@@ -1,0 +1,15 @@
+{
+  "vaults": {
+    "pve02": {
+      "id": "pve02",
+      "name": "PVE02 Production",
+      "description": "Main Proxmox homelab"
+    },
+    "pve2-test": {
+      "id": "pve2-test",
+      "name": "PVE2 Testing",
+      "description": "Testing vault for development and validation"
+    }
+  },
+  "active": "pve02"
+}

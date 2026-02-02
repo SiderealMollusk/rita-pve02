@@ -87,7 +87,7 @@ export default class TailscaleUp extends Command {
       // Check 4: Auth key exists in vault
       console.log(chalk.gray("4️⃣  Checking TAILSCALE_AUTH_KEY..."));
       const authKeyCheck = await checkOpPathExists(
-        "op://pve02/tailscale/auth-key"
+        "op://pve02/tailscale/AUTH_KEY"
       );
 
       let authKey: string | undefined;
