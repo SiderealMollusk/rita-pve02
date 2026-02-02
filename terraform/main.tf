@@ -1,11 +1,8 @@
-resource "proxmox_virtual_environment_file" "ubuntu_cloud_image" {
-  content_type = "iso"
-  datastore_id = "local"
-  node_name    = var.node_name
-
-  source_file {
-    path = "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"
-  }
+# Using pre-downloaded image at /var/lib/vz/images/ubuntu-noble.img
+# This avoids the problematic upload via API
+locals {
+  ubuntu_image_path = "/var/lib/vz/images/ubuntu-noble.img"
+  ubuntu_image_id   = "local:iso/ubuntu-noble.img"
 }
 
 resource "proxmox_virtual_environment_vm" "k8s_cp_01" {
@@ -36,7 +33,7 @@ resource "proxmox_virtual_environment_vm" "k8s_cp_01" {
 
   disk {
     datastore_id = var.storage_pool
-    file_id      = proxmox_virtual_environment_file.ubuntu_cloud_image.id
+    file_id      = local.ubuntu_image_id
     interface    = "scsi0"
     size         = 120
   }
@@ -82,7 +79,7 @@ resource "proxmox_virtual_environment_vm" "k8s_wk_01" {
 
   disk {
     datastore_id = var.storage_pool
-    file_id      = proxmox_virtual_environment_file.ubuntu_cloud_image.id
+    file_id      = local.ubuntu_image_id
     interface    = "scsi0"
     size         = 200
   }
@@ -128,7 +125,7 @@ resource "proxmox_virtual_environment_vm" "k8s_wk_02" {
 
   disk {
     datastore_id = var.storage_pool
-    file_id      = proxmox_virtual_environment_file.ubuntu_cloud_image.id
+    file_id      = local.ubuntu_image_id
     interface    = "scsi0"
     size         = 200
   }

@@ -8,11 +8,11 @@ terraform {
 }
 
 provider "proxmox" {
-  endpoint = var.proxmox_endpoint
+  endpoint  = var.proxmox_endpoint
   api_token = var.proxmox_api_token
-  insecure = true
+  insecure  = true
   ssh {
-    agent = true
-    # username = "root" # Optional if using API token with specific permissions
+    agent    = true
+    username = "root"
   }
 }

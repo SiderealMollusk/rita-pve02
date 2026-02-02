@@ -1,0 +1,1 @@
+source ./load-vars.sh
