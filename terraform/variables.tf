@@ -11,6 +11,11 @@ variable "ssh_public_key" {
   type = string
 }
 
+variable "ssh_private_key" {
+  type      = string
+  sensitive = true
+}
+
 variable "node_name" {
   type    = string
   default = "pve"

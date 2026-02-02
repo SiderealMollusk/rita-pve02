@@ -13,11 +13,11 @@ This repository contains the Infrastructure as Code (IaC) and configuration mana
 
 ### Resource Targets
 
-| Name | Role | vCPU | RAM | Disk |
-|------|------|------|-----|------|
-| k8s-cp-01 | Control Plane | 4 | 12 GB | 120 GB |
-| k8s-wk-01 | Worker | 6 | 20 GB | 200 GB |
-| k8s-wk-02 | Worker | 6 | 20 GB | 200 GB |
+| Name | Role | vCPU | RAM | Disk | IP Address |
+|------|------|------|-----|------|------------|
+| k8s-cp-01 | Control Plane | 4 | 12 GB | 120 GB | 192.168.6.100 |
+| k8s-wk-01 | Worker | 6 | 20 GB | 200 GB | 192.168.6.101 |
+| k8s-wk-02 | Worker | 6 | 20 GB | 200 GB | 192.168.6.102 |
 
 ## Prerequisites
 
@@ -67,22 +67,53 @@ These steps must be completed on the Proxmox host before running Terraform:
    apt update && apt install -y terraform
    ```
 
-6. **Create Terraform API Role & Token:**
+6. **Generate SSH key for localhost access (used by Terraform provider for disk import):**
+   ```bash
+   ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N "" -C "root@$(hostname)"
+   cat ~/.ssh/id_ed25519.pub >> ~/.ssh/authorized_keys
+   chmod 600 ~/.ssh/authorized_keys
+   ```
+
+7. **Download Ubuntu cloud image:**
+   ```bash
+   mkdir -p /var/lib/vz/images
+   cd /var/lib/vz/images
+   wget -O ubuntu-noble.img https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
+   ```
+
+8. **Copy Terraform files to Proxmox:**
+   ```bash
+   # From dev container
+   scp -r terraform/* root@<PROXMOX_TAILSCALE_IP>:/root/terraform/
+   cd /root/terraform && terraform init
+   ```
+
+9. **Create Terraform API Role & Token:**
    ```bash
    # Create role with required permissions
-   pveum role add TerraformRole -privs "Datastore.Audit,Datastore.AllocateSpace,VM.Audit,VM.Allocate,VM.Config.CDROM,VM.Config.CPU,VM.Config.Cloudinit,VM.Config.Disk,VM.Config.HWType,VM.Config.Memory,VM.Config.Network,VM.Config.Options,VM.Console,VM.PowerMgmt"
+   pveum role add TerraformRole -privs "Datastore.Audit,Datastore.AllocateSpace,VM.Audit,VM.Allocate,VM.Config.CDROM,VM.Config.CPU,VM.Config.Cloudinit,VM.Config.Disk,VM.Config.HWType,VM.Config.Memory,VM.Config.Network,VM.Config.Options,VM.Console,VM.PowerMgmt,SDN.Use,Sys.Modify"
    
    # Create token (replace TOKEN_NAME)
    pveum user token add root@pam TOKEN_NAME -privsep 0
    
    # Grant permissions to token
    pveum aclmod /storage/local -token 'root@pam!TOKEN_NAME' -role TerraformRole
+   pveum aclmod /storage/local-lvm -token 'root@pam!TOKEN_NAME' -role TerraformRole
    pveum aclmod /vms -token 'root@pam!TOKEN_NAME' -role TerraformRole
    ```
    
    Then run `npm run rotate:proxmox-token` to store the token in 1Password.
 
-**Note:** Running Terraform directly on Proxmox avoids dev container memory limitations.
+10. **Copy VM init SSH key to Proxmox (for SSH access to VMs):**
+    ```bash
+    # From dev container - copies the VM init private key so Proxmox can SSH to VMs
+    op read "op://pve02-test/VM_INIT_SSH_PRIVATE_KEY/value" > /tmp/vm-init-key
+    scp /tmp/vm-init-key root@<PROXMOX_TAILSCALE_IP>:/root/.ssh/vm-init
+    ssh root@<PROXMOX_TAILSCALE_IP> 'chmod 600 ~/.ssh/vm-init'
+    rm /tmp/vm-init-key
+    ```
+
+**Note:** Running Terraform directly on Proxmox avoids dev container memory limitations and SSH agent issues.
 
 ### 1. Initialize Secrets (Day 0)
 
@@ -162,27 +193,32 @@ npm run preflight -- --only-tags functional
 
 ### 4. Infrastructure Provisioning
 
-Ensure Proxmox endpoint is accessible:
+Provision VMs with Terraform via the remote apply script:
 
 ```bash
-curl -k https://<YOUR_PROXMOX_IP>:8006/api2/json/version
+# Sign in to 1Password first (session must be exported)
+export OP_SESSION_my=$(op signin --account my --raw)
+
+# Run terraform apply on Proxmox
+bash scripts/apply-terraform-remote.sh
 ```
 
-Then provision VMs with Terraform:
+This script:
+1. Loads config from `.env` and secrets from 1Password
+2. SSHs to Proxmox and runs `terraform apply`
+3. Uses Proxmox's own SSH key (`~/.ssh/id_ed25519`) for the provider's disk import operations
 
+**VMs Created:**
+| VM | IP Address | Description |
+|----|------------|-------------|
+| k8s-cp-01 | 192.168.6.100 | Control Plane |
+| k8s-wk-01 | 192.168.6.101 | Worker 1 |
+| k8s-wk-02 | 192.168.6.102 | Worker 2 |
+
+**Test SSH Access (from Proxmox):**
 ```bash
-cd terraform
-terraform init
-
-# Inject 1Password secrets into the environment for Terraform
-VAULT="$(jq -r '.active' ../vaults.config.json)"
-eval "$(sed "s/VAULT/$VAULT/g" ../secrets.template | op inject)"
-
-terraform plan
-terraform apply
+ssh -i ~/.ssh/vm-init ubuntu@192.168.6.100
 ```
-
-This creates 3 VMs with cloud-init setup (SSH keys, basic networking).
 
 ### 5. VM Snapshot Management (Optional)
 

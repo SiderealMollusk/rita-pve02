@@ -41,8 +41,12 @@ resource "proxmox_virtual_environment_vm" "k8s_cp_01" {
   initialization {
     ip_config {
       ipv4 {
-        address = "dhcp"
+        address = "192.168.6.100/22"
+        gateway = "192.168.4.1"
       }
+    }
+    dns {
+      servers = ["192.168.4.1"]
     }
     user_account {
       keys     = [var.ssh_public_key]
@@ -87,8 +91,12 @@ resource "proxmox_virtual_environment_vm" "k8s_wk_01" {
   initialization {
     ip_config {
       ipv4 {
-        address = "dhcp"
+        address = "192.168.6.101/22"
+        gateway = "192.168.4.1"
       }
+    }
+    dns {
+      servers = ["192.168.4.1"]
     }
     user_account {
       keys     = [var.ssh_public_key]
@@ -133,8 +141,12 @@ resource "proxmox_virtual_environment_vm" "k8s_wk_02" {
   initialization {
     ip_config {
       ipv4 {
-        address = "dhcp"
+        address = "192.168.6.102/22"
+        gateway = "192.168.4.1"
       }
+    }
+    dns {
+      servers = ["192.168.4.1"]
     }
     user_account {
       keys     = [var.ssh_public_key]

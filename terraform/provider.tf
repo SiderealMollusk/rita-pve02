@@ -12,7 +12,12 @@ provider "proxmox" {
   api_token = var.proxmox_api_token
   insecure  = true
   ssh {
-    agent    = true
-    username = "root"
+    agent       = false
+    private_key = var.ssh_private_key
+    username    = "root"
+    node {
+      name    = "pve02"
+      address = "localhost"
+    }
   }
 }
