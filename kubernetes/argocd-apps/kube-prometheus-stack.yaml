@@ -1,0 +1,83 @@
+# ArgoCD Application for kube-prometheus-stack
+# Includes: Prometheus, Grafana, Alertmanager, node-exporter, kube-state-metrics
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    targetRevision: "65.1.0"
+    chart: kube-prometheus-stack
+    helm:
+      valuesObject:
+        # Grafana config
+        grafana:
+          enabled: true
+          adminPassword: admin  # Change in production
+          service:
+            type: NodePort
+            nodePort: 30080
+          # Datasources for Loki and Tempo
+          additionalDataSources:
+            - name: Loki
+              type: loki
+              url: http://loki.monitoring.svc:3100
+              access: proxy
+              isDefault: false
+            - name: Tempo
+              type: tempo
+              url: http://tempo.monitoring.svc:3100
+              access: proxy
+              isDefault: false
+        
+        # Prometheus config
+        prometheus:
+          prometheusSpec:
+            retention: 7d
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 10Gi
+            # Enable remote write receiver for OTel
+            enableRemoteWriteReceiver: true
+          service:
+            type: NodePort
+            nodePort: 30090
+        
+        # Alertmanager
+        alertmanager:
+          enabled: true
+          alertmanagerSpec:
+            storage:
+              volumeClaimTemplate:
+                spec:
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 2Gi
+        
+        # Node exporter on all nodes
+        nodeExporter:
+          enabled: true
+        
+        # Disable components not needed in home lab
+        kubeProxy:
+          enabled: false
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

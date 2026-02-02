@@ -1,9 +1,17 @@
 ---
 - name: Install K3s server
   shell: |
-    curl -sfL https://get.k3s.io | sh -
+    curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable traefik --disable servicelb" sh -
   args:
     creates: /usr/local/bin/k3s
+
+- name: Wait for K3s to be ready
+  command: k3s kubectl get nodes
+  register: k3s_ready
+  retries: 30
+  delay: 10
+  until: k3s_ready.rc == 0
+  changed_when: false
 
 - name: Get K3s token
   command: cat /var/lib/rancher/k3s/server/node-token
@@ -14,3 +22,17 @@
   set_fact:
     cluster_token: "{{ k3s_token.stdout }}"
   run_once: true
+
+- name: Fetch kubeconfig to local machine
+  fetch:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: "{{ playbook_dir }}/../kubeconfig"
+    flat: yes
+
+- name: Update kubeconfig server address
+  delegate_to: localhost
+  become: no
+  replace:
+    path: "{{ playbook_dir }}/../kubeconfig"
+    regexp: 'https://127.0.0.1:6443'
+    replace: 'https://{{ ansible_host }}:6443'

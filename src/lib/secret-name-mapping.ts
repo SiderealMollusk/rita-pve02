@@ -8,6 +8,7 @@ export const secretNameToStrategy: Record<string, string> = {
   VM_INIT_SSH_PRIVATE_KEY: "ssh-private-key",
   TAILSCALE_AUTH_KEY: "tailscale-auth-key",
   TAILSCALE_API_TOKEN: "tailscale-api-token",
+  ARGOCD_ADMIN_PASSWORD: "argocd-admin-password",
 };
 
 /**

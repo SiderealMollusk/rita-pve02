@@ -1,0 +1,58 @@
+# ArgoCD Application for OpenTelemetry Demo
+# Full e-commerce demo app with traces, metrics, and logs
+# Uses built-in observability (Jaeger, Prometheus, Grafana) for simplicity
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: otel-demo
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
+    targetRevision: "0.32.0"
+    chart: opentelemetry-demo
+    helm:
+      valuesObject:
+        # Use default collector config - it's complex with spanmetrics connector
+        # We'll let the demo use its built-in observability for now
+        
+        # Frontend proxy service - expose via NodePort for demo access
+        components:
+          frontendProxy:
+            service:
+              type: NodePort
+              port: 8080
+            ingress:
+              enabled: false
+        
+        # Load generator - generates demo traffic automatically
+        default:
+          envOverrides:
+            - name: OTEL_COLLECTOR_NAME
+              value: $(OTEL_COLLECTOR_NAME)
+        
+        # Enable built-in observability stack for the demo
+        # These are lightweight and come pre-configured
+        jaeger:
+          enabled: true
+        prometheus:
+          enabled: true
+        grafana:
+          enabled: true
+          grafana:
+            service:
+              type: NodePort
+              nodePort: 30889
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: otel-demo
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

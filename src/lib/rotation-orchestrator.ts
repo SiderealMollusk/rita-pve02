@@ -158,6 +158,11 @@ This will be auto-generated. A new keypair will be created.`,
 3. Settings: Expiry=90 days
 4. Copy the token (format: tskey-api-...)
 5. Paste it below (or press Ctrl+C to skip):`,
+
+    "argocd-admin-password": `
+🔐 ArgoCD Admin Password
+This will be fetched automatically from the K8s cluster.
+Requires KUBECONFIG to be set and cluster accessible.`,
   };
 
   return instructions[strategy] || `Unknown strategy: ${strategy}`;
