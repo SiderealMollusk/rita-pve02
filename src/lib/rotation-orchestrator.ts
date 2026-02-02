@@ -85,13 +85,26 @@ export async function createDummyInOp(opPath: string): Promise<boolean> {
     // e.g., "vm-init-ssh" → "VM_INIT_SSH", "proxmox" → "PROXMOX"
     const title = item.toUpperCase().replace(/-/g, "_");
 
-    // Check if item exists, if not create it
+    // Check if item exists
+    let itemExists = false;
     try {
       await execa("op", ["item", "get", item, "--vault", vault]);
+      itemExists = true;
     } catch {
-      // Item doesn't exist, create it
-      await execa("op", ["item", "create", "--vault", vault, "--category", "password", "--title", title, `${field}=PLACEHOLDER`]);
+      itemExists = false;
     }
+
+    // If item exists, delete it first so we can recreate with correct title
+    if (itemExists) {
+      try {
+        await execa("op", ["item", "delete", item, "--vault", vault, "--archive"]);
+      } catch {
+        // Ignore deletion errors, might already be deleted
+      }
+    }
+
+    // Create the item with correct title
+    await execa("op", ["item", "create", "--vault", vault, "--category", "password", "--title", title, `${field}=PLACEHOLDER`]);
 
     return true;
   } catch (error) {
