@@ -27,6 +27,7 @@ import {
   proxmoxAPICheck,
   diskSpaceCheck,
 } from "../checks/proxmox-cli";
+import { proxmoxSshCheck } from "../checks/proxmox-ssh";
 import {
   terraformVersionCheck,
   terraformFmtCheck,
@@ -107,6 +108,7 @@ export default class Preflight extends Command {
         tailscaleTargetsCheck,
         qmVersionCheck,
         proxmoxAPICheck,
+        proxmoxSshCheck,
         diskSpaceCheck,
         sshPrivateKeyCheck,
         ansibleInventoryCheck,

@@ -32,6 +32,37 @@ export async function checkOpAvailable(): Promise<boolean> {
 }
 
 /**
+ * Check if op CLI is signed in
+ */
+export async function checkOpSignedIn(): Promise<boolean> {
+  try {
+    await execa("op", ["whoami"]);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Ensure op CLI is signed in, fail early with instructions if not
+ */
+export async function requireOpSignedIn(): Promise<void> {
+  const available = await checkOpAvailable();
+  if (!available) {
+    console.error("❌ op CLI not available");
+    console.error("Install: https://developer.1password.com/docs/cli/get-started");
+    process.exit(1);
+  }
+
+  const signedIn = await checkOpSignedIn();
+  if (!signedIn) {
+    console.error("❌ Not signed in to 1Password");
+    console.error("Run: op signin");
+    process.exit(1);
+  }
+}
+
+/**
  * Check if a secret path exists in op
  */
 export async function checkOpPathExists(opPath: string): Promise<{ exists: boolean; value?: string }> {

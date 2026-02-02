@@ -3,11 +3,15 @@
  * External no-op: user must generate from Tailscale UI
  */
 
-import { orchestrateRotation, getRotationInstructions } from "../lib/rotation-orchestrator";
+import { orchestrateRotation, getRotationInstructions, requireOpSignedIn } from "../lib/rotation-orchestrator";
 import { getStrategy } from "../lib/secret-name-mapping";
+import { getSecretConfig } from "../lib/secrets-config";
 import { createInterface } from "readline";
 
 async function rotateTailscaleApiToken() {
+  // Fail early if op not signed in
+  await requireOpSignedIn();
+
   const secretName = "TAILSCALE_API_TOKEN";
   const opPath = "op://pve02/tailscale/api-token";
   const strategy = getStrategy(secretName);
@@ -17,7 +21,12 @@ async function rotateTailscaleApiToken() {
     process.exit(1);
   }
 
-  console.log(`🔄 Rotating ${secretName}\n`);
+  const config = getSecretConfig(secretName);
+  console.log(`🔄 Rotating ${secretName}`);
+  if (config?.description) {
+    console.log(`   Purpose: ${config.description}`);
+  }
+  console.log();
 
   // Step 1: Orchestrate (check op, create dummy if needed)
   const state = await orchestrateRotation({
@@ -60,4 +69,9 @@ async function rotateTailscaleApiToken() {
   });
 }
 
-rotateTailscaleApiToken();
+rotateTailscaleApiToken()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error("❌ Fatal error:", error);
+    process.exit(1);
+  });
