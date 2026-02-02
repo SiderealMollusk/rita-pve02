@@ -81,9 +81,17 @@ export async function createDummyInOp(opPath: string): Promise<boolean> {
   try {
     const [vault, item, field] = opPath.replace("op://", "").split("/");
 
-    // Convert item name to SCREAMING_SNAKE_CASE for title
-    // e.g., "vm-init-ssh" → "VM_INIT_SSH", "proxmox" → "PROXMOX"
-    const title = item.toUpperCase().replace(/-/g, "_");
+    // Create descriptive titles based on item name
+    const titleMap: Record<string, string> = {
+      "PROXMOX_API_TOKEN": "PROXMOX_API_TOKEN",
+      "VM_INIT_SSH_PRIVATE_KEY": "VM_INIT_SSH_PRIVATE_KEY",
+      "VM_INIT_SSH_PUBLIC_KEY": "VM_INIT_SSH_PUBLIC_KEY",
+      "TAILSCALE_AUTH_KEY": "TAILSCALE_AUTH_KEY",
+      "TAILSCALE_API_TOKEN": "TAILSCALE_API_TOKEN",
+      "PROXMOX_SSH_HOST": "PROXMOX_SSH_HOST",
+    };
+
+    const title = titleMap[item] || item;
 
     // Check if item exists
     let itemExists = false;
