@@ -30,14 +30,24 @@ export function loadVaultsConfig(): VaultsConfig {
 }
 
 export function getActiveVault(): string {
-  // Check environment variable first (allows override)
+  const config = loadVaultsConfig();
+  const configActive = config.active;
   const envVault = process.env.OP_VAULT;
+
+  // Allow explicit override via OP_VAULT_OVERRIDE=1
+  if (envVault && process.env.OP_VAULT_OVERRIDE === "1") {
+    return envVault;
+  }
+
+  if (configActive) {
+    return configActive;
+  }
+
   if (envVault) {
     return envVault;
   }
 
-  const config = loadVaultsConfig();
-  return config.active;
+  throw new Error("No active vault configured (set vaults.config.json or OP_VAULT)");
 }
 
 export function getVaultInfo(vaultId: string): VaultEntry {

@@ -41,7 +41,7 @@ export function loadConfig(options: LoadConfigOptions = {}): Config {
   loadEnv({ path: envPath });
 
   // Validate required variables
-  const requiredVars = ["OP_VAULT", "PVE02_TS_MAGIC_IP", "TF_VAR_proxmox_endpoint"];
+  const requiredVars = ["PVE02_TS_MAGIC_IP", "TF_VAR_proxmox_endpoint"];
   const missing = requiredVars.filter((v) => !process.env[v]);
 
   if (missing.length > 0) {

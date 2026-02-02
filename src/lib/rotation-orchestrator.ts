@@ -131,8 +131,9 @@ export function getRotationInstructions(strategy: string): string {
 1. Go to your Proxmox interface
 2. Navigate to Datacenter → Permissions → API Tokens
 3. Create a new API token
-4. Copy the token value
-5. Paste it below (or press Ctrl+C to skip):`,
+  4. Copy the Token ID (e.g., root@pam!token-id)
+  5. Copy the Token Secret (shown once)
+  6. Paste both when prompted (or press Ctrl+C to skip):`,
 
     "ssh-public-key": `
 🔑 SSH Public Key

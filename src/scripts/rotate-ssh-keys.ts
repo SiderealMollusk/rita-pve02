@@ -80,11 +80,11 @@ async function rotateSshKeys() {
 
     // Store in op
     console.log(`✓ Generated. Storing in vault...`);
-    await execa("op", ["item", "edit", "vm-init-ssh", `PRIVATE_KEY=${privateKey}`, "--vault", activeVault]);
+    await execa("op", ["item", "edit", "VM_INIT_SSH_PRIVATE_KEY", `value=${privateKey}`, "--vault", activeVault]);
 
     // Also update public key
     const publicKey = readFileSync(`${keyPath}.pub`, "utf-8");
-    await execa("op", ["item", "edit", "vm-init-ssh", `PUBLIC_KEY=${publicKey}`, "--vault", activeVault]);
+    await execa("op", ["item", "edit", "VM_INIT_SSH_PUBLIC_KEY", `value=${publicKey}`, "--vault", activeVault]);
 
     console.log(`✓ SSH keys rotated successfully\n`);
 

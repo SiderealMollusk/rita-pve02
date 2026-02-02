@@ -52,28 +52,42 @@ async function rotateProxmoxToken() {
   console.log(getRotationInstructions(strategy));
   console.log();
 
-  // Step 2: Prompt for user input
-  const rl = createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
+  // Step 2: Prompt for user input (token id + secret)
+  const tokenId = await promptUser("Paste token ID (e.g., root@pam!token-id): ");
+  if (!tokenId.trim()) {
+    console.log("⏭️  Skipped");
+    process.exit(0);
+  }
 
-  rl.question("Paste token here: ", async (token) => {
-    rl.close();
+  const tokenSecret = await promptUser("Paste token secret: ");
+  if (!tokenSecret.trim()) {
+    console.log("⏭️  Skipped");
+    process.exit(0);
+  }
 
-    if (!token.trim()) {
-      console.log("⏭️  Skipped");
-      process.exit(0);
-    }
+  const combined = `${tokenId.trim()}=${tokenSecret.trim()}`;
 
-    try {
-      const { execa } = await import("execa");
-      await execa("op", ["item", "edit", "proxmox", `API_TOKEN=${token}`, "--vault", activeVault]);
-      console.log(`✓ Proxmox API token updated`);
-    } catch (error) {
-      console.error(`❌ Failed to update token:`, error);
-      process.exit(1);
-    }
+  try {
+    const { execa } = await import("execa");
+    await execa("op", ["item", "edit", "PROXMOX_API_TOKEN", `value=${combined}`, "--vault", activeVault]);
+    console.log(`✓ Proxmox API token updated`);
+  } catch (error) {
+    console.error(`❌ Failed to update token:`, error);
+    process.exit(1);
+  }
+}
+
+function promptUser(question: string): Promise<string> {
+  return new Promise((resolve) => {
+    const rl = createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    rl.question(question, (answer) => {
+      rl.close();
+      resolve(answer);
+    });
   });
 }
 

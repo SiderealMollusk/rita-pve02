@@ -5,9 +5,9 @@
       "name": "PVE02 Production",
       "description": "Main Proxmox homelab"
     },
-    "pve2-test": {
-      "id": "pve2-test",
-      "name": "PVE2 Testing",
+    "pve02-test": {
+      "id": "pve02-test",
+      "name": "PVE02 Testing",
       "description": "Testing vault for development and validation"
     }
   },

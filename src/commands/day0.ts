@@ -120,7 +120,7 @@ export default class Day0 extends Command {
         instructions: `
 Go to Proxmox UI → Datacenter → API Tokens
 Create a new API token (or copy existing)
-Format: <user>@<realm>!<tokenid>=<secret>`,
+    You will paste the Token ID and Token Secret separately`,
       },
       {
         name: "TAILSCALE_AUTH_KEY",
@@ -147,6 +147,29 @@ Format: tskey-api-...`,
     for (const secret of externalSecrets) {
       console.log(chalk.yellow(`\n  ${secret.prompt}`));
       console.log(chalk.gray(secret.instructions));
+
+      if (secret.name === "TF_VAR_PROXMOX_API_TOKEN") {
+        const tokenId = await this.promptUser(`\n  Paste Token ID (root@pam!token-id) or press Enter to skip: `);
+        if (!tokenId.trim()) {
+          console.log(chalk.gray(`  ⏭️  Skipped`));
+          continue;
+        }
+
+        const tokenSecret = await this.promptUser(`  Paste Token Secret: `);
+        if (!tokenSecret.trim()) {
+          console.log(chalk.gray(`  ⏭️  Skipped`));
+          continue;
+        }
+
+        const combined = `${tokenId.trim()}=${tokenSecret.trim()}`;
+        try {
+          await execa("op", ["item", "edit", secret.item, `value=${combined}`, "--vault", activeVault]);
+          console.log(chalk.gray(`  ✓ ${secret.prompt} stored`));
+        } catch (error) {
+          console.error(chalk.red(`  ✗ Failed to store ${secret.prompt}`));
+        }
+        continue;
+      }
 
       const value = await this.promptUser(`\n  Paste ${secret.prompt} (or press Enter to skip): `);
 

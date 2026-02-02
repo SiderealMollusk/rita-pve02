@@ -35,7 +35,7 @@ import {
   terraformValidateCheck,
 } from "../checks/terraform";
 import { sshPrivateKeyCheck, ansibleInventoryCheck } from "../checks/ssh-keys";
-import { secretsExistCheck, secretsValidateCheck } from "../checks/secrets";
+import { secretsExistCheck, secretsValidateCheck, secretsFunctionalCheck } from "../checks/secrets";
 
 export default class Preflight extends Command {
   static description = "Run comprehensive preflight checks before deployment";
@@ -104,6 +104,7 @@ export default class Preflight extends Command {
         opVaultCheck,
         secretsExistCheck,
         secretsValidateCheck,
+        secretsFunctionalCheck,
         tailscaleUpCheck,
         tailscaleTargetsCheck,
         qmVersionCheck,
