@@ -77,12 +77,13 @@ export async function checkOpPathExists(opPath: string): Promise<{ exists: boole
 /**
  * Create a dummy value in op for a secret that doesn't exist
  */
-export async function createDummyInOp(opPath: string, secretName?: string): Promise<boolean> {
+export async function createDummyInOp(opPath: string): Promise<boolean> {
   try {
     const [vault, item, field] = opPath.replace("op://", "").split("/");
 
-    // Use secretName as title if provided, otherwise use item name
-    const title = secretName || item;
+    // Convert item name to SCREAMING_SNAKE_CASE for title
+    // e.g., "vm-init-ssh" → "VM_INIT_SSH", "proxmox" → "PROXMOX"
+    const title = item.toUpperCase().replace(/-/g, "_");
 
     // Check if item exists, if not create it
     try {
@@ -165,7 +166,7 @@ export async function orchestrateRotation(context: RotationContext): Promise<Rot
   if (!state.pathExists) {
     console.log(`ℹ️  Path ${context.opPath} doesn't exist in op vault`);
     console.log(`📝 Creating placeholder...`);
-    state.createdDummy = await createDummyInOp(context.opPath, context.secretName);
+    state.createdDummy = await createDummyInOp(context.opPath);
 
     if (!state.createdDummy) {
       console.error(`❌ Failed to create placeholder`);
