@@ -1,0 +1,50 @@
+# Platform-specific values for rita-baseapp-01
+# This file is referenced by the ArgoCD Application using Multiple Sources
+
+replicaCount: 1
+
+image:
+  # TODO: Update with your GitHub org after publishing the app repo
+  repository: ghcr.io/siderealmollusk/rita-baseapp-01
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+  hosts:
+    # TODO: Update with your actual homelab domain
+    - host: baseapp.virgil.cymru
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+# Enable External Secrets for 1Password integration
+externalSecrets:
+  enabled: true
+  secretStoreName: "onepassword-connect"
+  secretStoreKind: "ClusterSecretStore"
+  refreshInterval: "1h"
+  remoteRef:
+    # The name of the item in your 1Password vault
+    key: "rita-baseapp-secrets"
+
+# OpenTelemetry configuration
+# Points to the observability stack in the cluster
+otel:
+  enabled: true
+  exporter:
+    traces:
+      endpoint: "http://tempo.monitoring.svc.cluster.local:4318/v1/traces"
+    metrics:
+      endpoint: "http://prometheus-pushgateway.monitoring.svc.cluster.local:9091"
+
+# Database configuration
+# TODO: Update with your actual database service
+database:
+  host: "postgres-service.rita-apps.svc.cluster.local"
+  port: "5432"

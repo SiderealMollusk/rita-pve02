@@ -1,0 +1,32 @@
+# ArgoCD Application for rita-baseapp-01
+# Uses Multiple Sources: App Repo for chart, Platform Repo for values
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rita-baseapp-01
+  namespace: argocd
+spec:
+  project: default
+  # Multiple Sources pattern for separating chart from values
+  sources:
+    # Source 1: The Helm chart from the App Repo
+    - repoURL: https://github.com/SiderealMollusk/rita-baseapp-01.git
+      targetRevision: main
+      path: charts/rita-v2-baseapp-02
+      helm:
+        valueFiles:
+          # Reference values from the Platform Repo (Source 2)
+          - $values/kubernetes/app-values/rita-baseapp-01/values.yaml
+    # Source 2: The values from the Platform Repo
+    - repoURL: https://github.com/SiderealMollusk/rita-pve02.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: rita-apps
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

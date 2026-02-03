@@ -18,5 +18,7 @@ secrets.env
 # Node.js / CLI
 node_modules/
 dist/
+# Ignore downloads directory for external/app repos
+/downloads/
 .npmrc
-*.log
+*.logtmp/
