@@ -21,4 +21,5 @@ dist/
 # Ignore downloads directory for external/app repos
 /downloads/
 .npmrc
-*.logtmp/
+*.log
+tmp/

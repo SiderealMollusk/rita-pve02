@@ -31,7 +31,7 @@ externalSecrets:
   refreshInterval: "1h"
   remoteRef:
     # The name of the item in your 1Password vault
-    key: "rita-baseapp-secrets"
+    key: "rita-baseapp-01-secrets"
 
 # OpenTelemetry configuration
 # Points to the observability stack in the cluster
