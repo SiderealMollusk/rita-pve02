@@ -2,9 +2,9 @@
  * 1Password CLI checks
  */
 
-import { Check, CheckResult, RunContext } from "../lib/types";
-import { exec, execOutput, commandExists } from "../lib/exec";
-import { validateSecretsTemplate } from "../lib/config";
+import { Check, CheckResult, RunContext } from "../lib/types.js";
+import { exec, execOutput, commandExists } from "../lib/exec.js";
+import { validateSecretsTemplate } from "../lib/config.js";
 
 /**
  * Check: op CLI is installed
@@ -132,9 +132,9 @@ export const opSecretsResolveCheck: Check = {
   id: "op-secrets-resolve",
   title: "1Password secret references resolve",
   tags: ["preflight", "op"],
-  async run(ctx: RunContext): Promise<CheckResult> {
+  async run(): Promise<CheckResult> {
     try {
-      const refs = validateSecretsTemplate(ctx.config.secretsTemplate);
+      const refs = validateSecretsTemplate();
 
       if (refs.length === 0) {
         return {

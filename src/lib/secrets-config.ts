@@ -2,7 +2,7 @@
  * Load secrets config with descriptions
  */
 import { readFileSync } from "fs";
-import { getActiveVault } from "./vaults-config";
+import { getActiveVault } from "./vaults-config.js";
 
 export interface SecretConfig {
   name: string;
@@ -46,4 +46,8 @@ export function loadSecretsConfig(): SecretsConfigFile {
 export function getSecretConfig(secretName: string): SecretConfig | undefined {
   const config = loadSecretsConfig();
   return config.secrets.find((s) => s.name === secretName);
+}
+
+export function getStrategy(secretName: string): string | undefined {
+  return getSecretConfig(secretName)?.strategy;
 }

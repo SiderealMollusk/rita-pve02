@@ -15,5 +15,6 @@
             ]
         }
     },
+    "postCreateCommand": "npm install && npm run secrets:generate",
     "remoteUser": "vscode"
 }

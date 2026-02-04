@@ -4,7 +4,7 @@
  */
 
 import { execa } from "execa";
-import { getStrategy } from "./secret-name-mapping";
+import { getStrategy } from "./secrets-config.js";
 
 export interface RotationContext {
   secretName: string;

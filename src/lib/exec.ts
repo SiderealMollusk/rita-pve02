@@ -3,7 +3,7 @@
  */
 
 import { execa, ExecaError, Options } from "execa";
-import { RunContext } from "./types";
+import { RunContext } from "./types.js";
 
 export interface ExecOptions extends Options {
   throwOnError?: boolean;

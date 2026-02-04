@@ -7,9 +7,8 @@
 
 import { Command } from "@oclif/core";
 import chalk from "chalk";
-import { getStrategy } from "../lib/secret-name-mapping.js";
 import { orchestrateRotation, getRotationInstructions, requireOpSignedIn } from "../lib/rotation-orchestrator.js";
-import { getSecretConfig, loadSecretsConfig } from "../lib/secrets-config.js";
+import { getSecretConfig, loadSecretsConfig, getStrategy } from "../lib/secrets-config.js";
 import { getActiveVault } from "../lib/vaults-config.js";
 import { execa } from "execa";
 import { createInterface } from "readline";
@@ -57,6 +56,10 @@ export default class Day0 extends Command {
       // Step 4: Prompt for external secrets
       console.log(chalk.cyan("\nStep 3: Prompting for external secrets..."));
       await this.promptForExternalSecrets();
+
+      // Step 5: Generate .env.secrets
+      console.log(chalk.cyan("\nStep 4: Generating .env.secrets..."));
+      await execa("npm", ["run", "secrets:generate"]);
 
       console.log(chalk.green("\n✓ Day 0 initialization complete!\n"));
     } catch (error) {

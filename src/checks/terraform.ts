@@ -2,8 +2,8 @@
  * Terraform checks
  */
 
-import { Check, CheckResult, RunContext } from "../lib/types";
-import { execOutput, exec } from "../lib/exec";
+import { Check, CheckResult, RunContext } from "../lib/types.js";
+import { execOutput, exec } from "../lib/exec.js";
 
 /**
  * Check: terraform CLI is installed
