@@ -11,6 +11,7 @@ inventory.ini
 
 # Environment
 .env
+.env.secrets
 secrets.env
 
 # Dev Container

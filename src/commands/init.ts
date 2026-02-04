@@ -4,8 +4,7 @@
 
 import { Command, Flags } from "@oclif/core";
 import chalk from "chalk";
-import { parseSecretsTemplate as parseTemplate } from "../lib/secrets-template-parser.js";
-import { getStrategy } from "../lib/secret-name-mapping.js";
+import { loadSecretsConfig, getStrategy } from "../lib/secrets-config.js";
 import { orchestrateRotation, getRotationInstructions } from "../lib/rotation-orchestrator.js";
 import { getActiveVault } from "../lib/vaults-config.js";
 import { resolve } from "path";
@@ -25,7 +24,6 @@ export default class Init extends Command {
     const { flags } = await this.parse(Init);
 
     try {
-      const { loadSecretsConfig } = await import("../lib/secrets-config.js");
       const config = loadSecretsConfig();
       const activeVault = getActiveVault();
 
@@ -84,6 +82,10 @@ export default class Init extends Command {
           succeeded++;
         }
       }
+
+      console.log(chalk.cyan("\n📝 Generating .env.secrets..."));
+      const { execa } = await import("execa");
+      await execa("npm", ["run", "secrets:generate"]);
 
       console.log(chalk.blue(`\n✓ Initialization complete`));
       console.log(chalk.gray(`  Succeeded: ${succeeded}`));

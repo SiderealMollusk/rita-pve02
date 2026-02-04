@@ -3,10 +3,9 @@
  * Ensures all required secrets exist and are valid in 1Password
  */
 
-import { Check, CheckResult, RunContext } from "../lib/types";
-import { getStrategy } from "../lib/secret-name-mapping";
-import { exec, execJSON, execOutput } from "../lib/exec";
-import { loadSecretsConfig } from "../lib/secrets-config";
+import { Check, CheckResult, RunContext } from "../lib/types.js";
+import { exec, execJSON, execOutput } from "../lib/exec.js";
+import { loadSecretsConfig, getStrategy } from "../lib/secrets-config.js";
 import { tmpdir } from "os";
 import { join } from "path";
 import { writeFileSync, rmSync, chmodSync } from "fs";
@@ -188,7 +187,7 @@ export const secretsFunctionalCheck: Check = {
   async run(ctx: RunContext): Promise<CheckResult> {
     try {
       const config = loadSecretsConfig();
-      const byName = Object.fromEntries(config.secrets.map((s) => [s.name, s.opPath]));
+      const byName = Object.fromEntries(config.secrets.map((s: { name: string, opPath: string }) => [s.name, s.opPath]));
 
       const failures: string[] = [];
       const passes: string[] = [];

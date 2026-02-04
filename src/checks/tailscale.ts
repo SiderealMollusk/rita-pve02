@@ -2,8 +2,8 @@
  * Tailscale CLI checks
  */
 
-import { Check, CheckResult, RunContext } from "../lib/types";
-import { execOutput, execJSON } from "../lib/exec";
+import { Check, CheckResult, RunContext } from "../lib/types.js";
+import { execOutput, execJSON } from "../lib/exec.js";
 
 interface TailscaleStatus {
   BackendState: string;

@@ -3,10 +3,10 @@
  * External no-op: user must generate from Tailscale UI
  */
 
-import { orchestrateRotation, getRotationInstructions, requireOpSignedIn } from "../lib/rotation-orchestrator";
-import { getStrategy } from "../lib/secret-name-mapping";
-import { getSecretConfig } from "../lib/secrets-config";
-import { getActiveVault } from "../lib/vaults-config";
+import { orchestrateRotation, getRotationInstructions, requireOpSignedIn } from "../lib/rotation-orchestrator.js";
+import { getStrategy } from "../lib/secrets-config.js";
+import { getSecretConfig } from "../lib/secrets-config.js";
+import { getActiveVault } from "../lib/vaults-config.js";
 import { createInterface } from "readline";
 
 async function rotateTailscaleAuthKey() {

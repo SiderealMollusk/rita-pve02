@@ -16,6 +16,7 @@
     "day0": "tsx src/bin/run.ts day0",
     "day0:secrets": "tsx src/bin/run.ts init",
     "day0:tailscale": "tsx src/bin/run.ts tailscale-up",
+    "secrets:generate": "tsx src/scripts/generate-secrets-env.ts",
     "rotate:ssh-keys": "tsx src/scripts/rotate-ssh-keys.ts",
     "rotate:proxmox-token": "tsx src/scripts/rotate-proxmox-token.ts",
     "rotate:tailscale-auth-key": "tsx src/scripts/rotate-tailscale-auth-key.ts",

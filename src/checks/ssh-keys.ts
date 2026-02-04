@@ -2,7 +2,7 @@
  * SSH and key management checks
  */
 
-import { Check, CheckResult, RunContext } from "../lib/types";
+import { Check, CheckResult, RunContext } from "../lib/types.js";
 import { existsSync } from "fs";
 import { statSync } from "fs";
 import { homedir } from "os";

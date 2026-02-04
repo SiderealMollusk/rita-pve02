@@ -4,10 +4,10 @@
 
 import { Command, Flags } from "@oclif/core";
 import chalk from "chalk";
-import { loadConfig, isSecretsEnvStale } from "../lib/config";
-import { runChain } from "../lib/chains";
-import { formatChainReports, createChainReport } from "../lib/summary";
-import { Check, RunContext } from "../lib/types";
+import { loadConfig, isSecretsEnvStale } from "../lib/config.js";
+import { runChain } from "../lib/chains.js";
+import { formatChainReports, createChainReport } from "../lib/summary.js";
+import { Check, RunContext } from "../lib/types.js";
 
 // Import all checks
 import {
@@ -16,26 +16,26 @@ import {
   opAuthCheck,
   opVaultCheck,
   opSecretsResolveCheck,
-} from "../checks/op-cli";
+} from "../checks/op-cli.js";
 import {
   tailscaleVersionCheck,
   tailscaleUpCheck,
   tailscaleTargetsCheck,
-} from "../checks/tailscale";
+} from "../checks/tailscale.js";
 import {
   qmVersionCheck,
   proxmoxAPICheck,
   diskSpaceCheck,
-} from "../checks/proxmox-cli";
-import { proxmoxSshCheck } from "../checks/proxmox-ssh";
+} from "../checks/proxmox-cli.js";
+import { proxmoxSshCheck } from "../checks/proxmox-ssh.js";
 import {
   terraformVersionCheck,
   terraformFmtCheck,
   terraformInitCheck,
   terraformValidateCheck,
-} from "../checks/terraform";
-import { sshPrivateKeyCheck, ansibleInventoryCheck } from "../checks/ssh-keys";
-import { secretsExistCheck, secretsValidateCheck, secretsFunctionalCheck } from "../checks/secrets";
+} from "../checks/terraform.js";
+import { sshPrivateKeyCheck, ansibleInventoryCheck } from "../checks/ssh-keys.js";
+import { secretsExistCheck, secretsValidateCheck, secretsFunctionalCheck } from "../checks/secrets.js";
 
 export default class Preflight extends Command {
   static description = "Run comprehensive preflight checks before deployment";

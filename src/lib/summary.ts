@@ -3,7 +3,7 @@
  */
 
 import chalk from "chalk";
-import { CheckReport, ChainReport } from "./types";
+import { CheckReport, ChainReport } from "./types.js";
 
 /**
  * Format a single check report for display

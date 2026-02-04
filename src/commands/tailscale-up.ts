@@ -4,9 +4,9 @@
 
 import { Command, Flags } from "@oclif/core";
 import chalk from "chalk";
-import { execOutput, execJSON } from "../lib/exec";
-import { loadConfig } from "../lib/config";
-import { checkOpAvailable, checkOpPathExists } from "../lib/rotation-orchestrator";
+import { execOutput, execJSON } from "../lib/exec.js";
+import { loadConfig } from "../lib/config.js";
+import { checkOpAvailable, checkOpPathExists } from "../lib/rotation-orchestrator.js";
 
 interface TailscaleStatus {
   BackendState?: string;

@@ -2,12 +2,12 @@
  * Proxmox SSH connectivity checks (keys + IPs pulled from 1Password)
  */
 
-import { Check, CheckResult, RunContext } from "../lib/types";
-import { exec, execOutput, commandExists } from "../lib/exec";
+import { Check, CheckResult, RunContext } from "../lib/types.js";
+import { exec, execOutput, commandExists } from "../lib/exec.js";
 import { readFileSync, writeFileSync, mkdtempSync, rmSync, chmodSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
-import { getActiveVault } from "../lib/vaults-config";
+import { getActiveVault } from "../lib/vaults-config.js";
 
 interface SecretsConfig {
   secrets: Array<{

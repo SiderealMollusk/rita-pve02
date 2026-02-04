@@ -4,10 +4,10 @@
  */
 
 import { execa } from "execa";
-import { orchestrateRotation, getRotationInstructions, requireOpSignedIn } from "../lib/rotation-orchestrator";
-import { getStrategy } from "../lib/secret-name-mapping";
-import { getSecretConfig } from "../lib/secrets-config";
-import { getActiveVault } from "../lib/vaults-config";
+import { orchestrateRotation, getRotationInstructions, requireOpSignedIn } from "../lib/rotation-orchestrator.js";
+import { getStrategy } from "../lib/secrets-config.js";
+import { getSecretConfig } from "../lib/secrets-config.js";
+import { getActiveVault } from "../lib/vaults-config.js";
 
 async function rotateSshKeys() {
   // Fail early if op not signed in

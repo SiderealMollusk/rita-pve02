@@ -133,43 +133,40 @@ npm run day0:secrets
 
 This project uses 1Password for centralized secret management with support for multiple vaults (production and testing).
 
+#### Core Strategy
+- **Master Map:** `secrets.config.json` defines all secrets, their 1Password paths, and rotation strategies.
+- **Dynamic Injection:** Secrets are never stored on disk. Instead, `op://` URIs are generated into a gitignored `.env.secrets` file and injected at runtime using `op run`.
+
 #### TL;DR Secret Flow
 
 ```bash
 npm run day0
 ```
-Creates items + generates SSH keys + prompts for external secrets.
+Creates items + generates SSH keys + prompts for external secrets + generates `.env.secrets`.
+
+```bash
+npm run secrets:generate
+```
+Manually regenerates `.env.secrets` from `secrets.config.json` (also runs automatically in Dev Container).
 
 ```bash
 npm run preflight -- --only-tags secrets
 ```
-Validates that secrets exist and are formatted correctly.
-
+Validates that secrets exist and are functional in 1Password.
 
 **Vault Configuration:** [vaults.config.json](vaults.config.json)
 ```json
 {
   "vaults": {
     "pve02": { "id": "pve02", "name": "PVE02 Production", ... },
-    "pve02-test": { "id": "pve02-test", "name": "PVE2 Testing", ... }
+    "pve02-test": { "id": "pve02-test", "name": "PVE02 Testing", ... }
   },
   "active": "pve02-test"
 }
 ```
 
 **Change Active Vault:**
-
-Edit vaults.config.json and update the active field:
-
-```json
-"active": "pve02-test"
-```
-
-Or override at runtime:
-
-```bash
-OP_VAULT=pve02 OP_VAULT_OVERRIDE=1 npm run day0
-```
+Edit `vaults.config.json` and update the `active` field. The environment will be automatically updated on the next run.
 
 **Secret Rotation Commands:**
 ```bash

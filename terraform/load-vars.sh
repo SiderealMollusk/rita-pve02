@@ -8,9 +8,13 @@ if [ -f "../.env" ]; then
   source "../.env"
 fi
 
-# Inject secrets from 1Password using the active vault
+# Always regenerate secrets environment to ensure correct vault is used
+echo "Generating .env.secrets..."
+(cd .. && npm run secrets:generate > /dev/null)
+
+# Inject secrets from 1Password using the generated secrets environment
 VAULT="$(jq -r '.active' ../vaults.config.json)"
-eval "$(sed "s/VAULT/$VAULT/g" ../secrets.template | op inject)"
+eval "$(op inject -i ../.env.secrets)"
 set +a
 
 echo "Loaded Terraform variables from .env and 1Password (vault: $VAULT)."

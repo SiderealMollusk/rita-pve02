@@ -41,7 +41,7 @@ export interface ChainReport {
 
 export interface Config {
   envFile: string;
-  secretsTemplate: string;
+  secretsConfig: string;
   secretsEnv: string;
   vault: string;
   proxyEndpoint: string;

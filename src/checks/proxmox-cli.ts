@@ -2,8 +2,8 @@
  * Proxmox CLI and API checks
  */
 
-import { Check, CheckResult, RunContext } from "../lib/types";
-import { exec, execOutput } from "../lib/exec";
+import { Check, CheckResult, RunContext } from "../lib/types.js";
+import { exec, execOutput } from "../lib/exec.js";
 
 /**
  * Check: qm CLI is available (Proxmox management)

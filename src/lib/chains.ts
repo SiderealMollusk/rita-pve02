@@ -4,8 +4,8 @@
 
 import { Listr, ListrTask } from "listr2";
 import chalk from "chalk";
-import { Check, CheckReport, CheckResult, RunContext } from "./types";
-import { createChainReport } from "./summary";
+import { Check, CheckReport, CheckResult, RunContext } from "./types.js";
+import { createChainReport } from "./summary.js";
 
 export interface ChainOptions {
   name: string;
