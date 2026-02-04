@@ -9,6 +9,9 @@ image:
   pullPolicy: IfNotPresent
   tag: "latest"
 
+imagePullSecrets:
+  - name: ghcr-login
+
 ingress:
   enabled: true
   className: "traefik"
