@@ -1,0 +1,57 @@
+# Platform-specific values for rita-baseapp-02
+# This file is referenced by the ArgoCD Application using Multiple Sources
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/siderealmollusk/rita-baseapp-02
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets:
+  - name: ghcr-login
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+  hosts:
+    - host: baseapp02.virgil.cymru
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Enable External Secrets for 1Password integration
+externalSecrets:
+  enabled: true
+  secretStoreName: "onepassword-connect"
+  secretStoreKind: "ClusterSecretStore"
+  refreshInterval: "1h"
+  remoteRef:
+    # The name of the item in your 1Password vault
+    key: "rita-baseapp-02-secrets"
+
+# OpenTelemetry configuration
+# Points to the observability stack in the cluster
+otel:
+  enabled: true
+  exporter:
+    traces:
+      endpoint: "http://tempo.monitoring.svc.cluster.local:4318/v1/traces"
+    metrics:
+      endpoint: "http://prometheus-pushgateway.monitoring.svc.cluster.local:9091"
